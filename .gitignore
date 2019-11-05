@@ -1,0 +1,7 @@
+__pycache__/
+credentials.json
+token.pickle
+config.json
+fonts/
+img/
+info.log
