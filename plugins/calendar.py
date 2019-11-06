@@ -12,7 +12,7 @@ from datetime import datetime
 import logging
 
 CONFIG = json.load(open("config.json"))
-logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 
 class Calendar(Plugin):
     
@@ -136,7 +136,7 @@ def is_event_upcoming(event):
 
 def ambiguous_time_to_unix(time):
     """
-    Time in calendar can both be a date if the event is a full-day-event or dateTime TOCHECK
+    Time in calendar can both be a date if the event is a full-day-event or dateTime
     """
     if 'date' in time:
         return to_unix(time['date'])
