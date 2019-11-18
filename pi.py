@@ -16,16 +16,15 @@ import logging
 
 CONFIG = json.load(open("config.json"))
 logger = logging.getLogger(__name__)
-UPDATE_FREQUENCY = 60 * 3
-TIME_BETWEEN_POPUPS = 10
 
-# 212x104 
+UPDATE_FREQUENCY = CONFIG['SECONDS_BETWEEN_CHECKING_UPDATES']
 
 class Pi:
     
     def __init__(self, inky):
         self.inky = inky
-        self.screen = PIL.Image.new('RGB', (212 * 2, 104 * 2), tuple(CONFIG['BACKGROUND_COLOR_RGB'])) #TODO Make it get the size from Inky inky.size)
+        self.display_size = CONFIG['SCREEN_SIZE'][0] * CONFIG['UPSCALE'], CONFIG['SCREEN_SIZE'][1] * CONFIG['UPSCALE'] # TODO Make Config Screen Size be optained by inky.
+        self.screen = PIL.Image.new('RGB', self.display_size, tuple(CONFIG['BACKGROUND_COLOR_RGB']))
         self.last_updated = datetime.utcfromtimestamp(0)
         
         # plugin.name -> {plugin}
@@ -40,37 +39,43 @@ class Pi:
             return True
         except Exception as e:
             logging.info(e)
-            print("ERROR in registering plugin: {} ".format(plugin.name))
+            logging.info(f"ERROR in registering plugin: {plugin.name}")
             return False
     
     # Check if enought time has passed from last potential update. If so query the plugins
     def maybe_update_and_refresh(self):
-        from_last_update = datetime.now() - self.last_updated
-        logging.info("{}s Since last update".format(from_last_update.total_seconds()))
-        if from_last_update.total_seconds() >= UPDATE_FREQUENCY:
+        second_from_last_update = (datetime.now() - self.last_updated).total_seconds()
+        logging.info(f"{second_from_last_update}s Since last update")
+        if second_from_last_update >= UPDATE_FREQUENCY:
             self.pool_plugins_and_maybe_refresh()
             self.last_updated = datetime.now()
             logging.info("POOLED")
     
     # Obtain fresh info data from plugins, and if any is new refresh the screen. 
     def pool_plugins_and_maybe_refresh(self):
+        """
+        Pool all of the plugins to check if any of them has an update. (new Data or Popups)
+        If so trigger the refresh of the screen. 
+        This is done to minimize e-ink screen refresh as that can take up to a couple of seconds. 
+        """
         need_refresh = False
-        logging.info("Pooling plugins")
-        for idx, (name, config)  in enumerate(sorted(self.plugins.items(), key = lambda x : x[1].position.get_z_index())): 
-            logging.info("{}/{} Pooling: {}".format(idx + 1, len(self.plugins), name))
-            if config.check_and_store_potential_new_data(): # There was new data
+        logging.info("Pooling plugins...")
+        for idx, (name, plugin)  in enumerate(sorted(self.plugins.items(), key = lambda x : x[1].position.get_z_index())): 
+            logging.info(f"{idx + 1}/{len(self.plugins)} Pooling: {name}")
+            if plugin.check_and_store_potential_new_data():
                 need_refresh = True
-                popup = config.get_and_consume_popup()
-                if popup: self.popups.append(popup)
-                
+                popup = plugin.get_and_consume_popup()
+                if popup: self.popups.extend(popup)
+        
+        SECONDS_BETWEEN_POPUPS = 10
+
         if self.popups:
-            logging.info("Popup found")
+            logging.info(f"N*{len(self.popups)} Popups found to process...")
             self.generate_and_refresh_screen()
             while self.popups:
                 popup = self.popups.popleft()
-                logging.info("Processing popup: {}".format(popup))
                 self.show_popup(popup)
-                time.sleep(TIME_BETWEEN_POPUPS)
+                time.sleep(SECONDS_BETWEEN_POPUPS)
             
         if need_refresh or self.popups:
             # This also take care of removing the popups
@@ -81,28 +86,37 @@ class Pi:
         self.refresh_screen()
          
     def generate_new_screen(self):
+        """
+        Render a new Screen Image from all the Plugins. 
+        """
         logging.info("Generating Screen")
         self.screen = PIL.Image.new('RGB', self.screen.size, tuple(CONFIG['BACKGROUND_COLOR_RGB'])) # Create new blank PIL Image with same size as previous one
         for name, plugin in self.plugins.items():
-            logging.info("Generating {} view...".format(name))
+            logging.info(f"Generating {name} view...")
             self.add_image(plugin.render(), plugin.position)
-            # Update the PIL Image with the plugins stuff, check if we want a border as well. That could be coool
 
     def refresh_screen(self):
+        """
+        Update the Screen with the latest Image generated
+        """
         logging.info("Refreshing Screen")
-        self.screen.save("img/" + uuid.uuid4().hex + ".png")
-        # imshow(self.screen, cmap='gray')
+        self.screen.save(f"img/{uuid.uuid4().hex}.png")
         # self.inky.display(self.screen)
     
-    def show_popup(self, popup):
-        middle = 212//2 * 2, 104//2 * 2
-        start = middle[0] - Popup.SIZE[0] // 2, middle[1] - Popup.SIZE[1] // 2
-        pos = Position(start[0] , start[1], Popup.SIZE[0], Popup.SIZE[1], 2)
-        self.add_image(Popup(popup, pos).render(), pos)
+    def show_popup(self, popup_text):
+        """
+        Generate and display in the middle of the Screen a new Popup based on Popup Text
+        """
+        logging.info(f"Processing Popup: {popup_text}")
+        popup = Popup(popup_text, self.display_size)
+        self.add_image(popup.render(), popup.position)
         self.refresh_screen()
 
     def add_image(self, img, position):
-        logging.info("Adding IMG in position {}".format(position.get_bounding_box()))
+        """
+        Add a PIL Image in a given position in the background. \
+        """        
+        logging.info(f"Adding IMG - ({img.size}) in position {position.get_bounding_box()}")
         background = self.screen
         if position.border:
             # Render a border as background
@@ -113,8 +127,13 @@ class Pi:
 class Popup(Plugin):
 
     name = "POPUP"
-    SIZE = (100 * 2, 30 * 2)   
+    size = (100 * CONFIG['UPSCALE'], 30 * CONFIG['UPSCALE'])
+    border_size = 2 + CONFIG['UPSCALE']
 
-    def __init__(self, text, position):
-        super.__init__(position)
+    def __init__(self, text, parent_size):
+        middle_x, middle_y = parent_size // 2 # TODO as par. size is a tuple do a map or something similar
+        start_x, start_y = middle_x - (Popup.size[0] // 2), middle_y - (Popup.size[1] // 2)
+        centered_pos = Position(start_x, start_y, Popup.size[0], Popup.size[1], self.border_size)
+        Plugin.__init__(self, centered_pos) # TODO Pretty confident this should be before anything else
+        self.position = centered_pos
         self.last_data = text

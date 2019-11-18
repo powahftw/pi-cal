@@ -45,27 +45,31 @@ class Calendar(Plugin):
     def update(self):
         calendars = self.obtain_interesting_calendar()
         self.events = self.obtain_and_merge_events(calendars)
-        return self.get_events(), self.get_notification()
+        return self.get_events(), self.starting_soon_events()
 
-    def get_notification(self):
-        return [f"Starting: {event['summary']}" for event in self.events if not is_all_day(event) and is_event_upcoming(event)]
+    def starting_soon_events(self):
+        """
+        Obtain a 
+        """
+        starting_soon = lambda event: not is_all_day(event) and is_event_upcoming(event)
+        return [f"Starting: {event['summary']}" for event in self.events if starting_soon(event)]
     
     def get_events(self, limit = 3): 
-        #all_day_events = [event for event in self.events if is_all_day(event)]
+        """
+        Obtain at most {limit} number of non_all_day_events.
+        """
         non_all_day_events = [event for event in self.events if not is_all_day(event)]
         
         if not non_all_day_events:
             logging.info('No upcoming non-all-day-events found.')
             return []
         
-        for event in non_all_day_events:
-            if is_event_ongoing(event):
-                print("Ongoing {}, {} min left".format(event['summary'], time_delta_from_now_formatted(event['end'])))
-            else:
-                print("Upcoming {}, {} min to start".format(event['summary'], time_delta_from_now_formatted(event['start'])))
         return [format_event(event) for event in non_all_day_events[:limit]]
                                         
     def obtain_interesting_calendar(self):
+        """
+        Return a list of calendar's id that the user is interested in, based on config.json settings.
+        """
         res = []
         calendar_list = self.service.calendarList().list().execute()
         for calendar_list_entry in calendar_list['items']:
@@ -74,7 +78,9 @@ class Calendar(Plugin):
         return res
     
     def obtain_and_merge_events(self, calendars):
-         # Call the Calendar API
+        """
+        Obtain events from differents calendars and merge them togheter, sorted by start_time.
+        """
         now = datetime.utcnow()
         now_tz = now.isoformat() + 'Z'
         max_tz = (now + timedelta(2)).isoformat() + 'Z'
@@ -96,8 +102,12 @@ class Calendar(Plugin):
 ### Helpers function
 
 def format_event(event):
+    """
+    Format a given event
+    eg: 14:10 : Meeting X, 10m LEFT : Meeting
+    """
     if is_event_ongoing(event):
-            return f"{time_delta_from_now_formatted(event['end'])}m LEFT {event['summart']}"
+            return f"{time_delta_from_now_formatted(event['end'])}m LEFT : {event['summart']}"
     else:
         formatted_time = datetime.utcfromtimestamp(ambiguous_time_to_unix(event['start'])).strftime('%H:%M')
         return f"{formatted_time} : {event['summary']}"
@@ -136,7 +146,7 @@ def is_event_upcoming(event):
 
 def ambiguous_time_to_unix(time):
     """
-    Time in calendar can both be a date if the event is a full-day-event or dateTime
+    Time in calendar can both be a date if the event is a full-day-event or dateTime #TODO Ex
     """
     if 'date' in time:
         return to_unix(time['date'])
