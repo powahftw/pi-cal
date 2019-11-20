@@ -23,7 +23,7 @@ class Pi:
     
     def __init__(self, inky):
         self.inky = inky
-        self.display_size = CONFIG['SCREEN_SIZE'][0] * CONFIG['UPSCALE'], CONFIG['SCREEN_SIZE'][1] * CONFIG['UPSCALE'] # TODO Make Config Screen Size be optained by inky.
+        self.display_size = inky.WIDTH * CONFIG['UPSCALE'],inky.HEIGHT * CONFIG['UPSCALE']
         self.screen = PIL.Image.new('RGB', self.display_size, tuple(CONFIG['BACKGROUND_COLOR_RGB']))
         self.last_updated = datetime.utcfromtimestamp(0)
         
@@ -97,11 +97,12 @@ class Pi:
 
     def refresh_screen(self):
         """
-        Update the Screen with the latest Image generated
+        Update the actual E-Ink Screen with the latest Image generated
         """
         logging.info("Refreshing Screen")
         self.screen.save(f"img/{uuid.uuid4().hex}.png")
-        # self.inky.display(self.screen)
+        # self.inky.set_image(self.screen)
+        # self.inky.show()
     
     def show_popup(self, popup_text):
         """
@@ -114,7 +115,7 @@ class Pi:
 
     def add_image(self, img, position):
         """
-        Add a PIL Image in a given position in the background. \
+        Add a PIL Image in a given position over the background.
         """        
         logging.info(f"Adding IMG - ({img.size}) in position {position.get_bounding_box()}")
         background = self.screen
@@ -128,12 +129,12 @@ class Popup(Plugin):
 
     name = "POPUP"
     size = (100 * CONFIG['UPSCALE'], 30 * CONFIG['UPSCALE'])
-    border_size = 2 + CONFIG['UPSCALE']
+    border_size = 2 * CONFIG['UPSCALE']
 
     def __init__(self, text, parent_size):
-        middle_x, middle_y = parent_size // 2 # TODO as par. size is a tuple do a map or something similar
+        middle_x, middle_y = tuple(x // 2 for x in parent_size)
         start_x, start_y = middle_x - (Popup.size[0] // 2), middle_y - (Popup.size[1] // 2)
         centered_pos = Position(start_x, start_y, Popup.size[0], Popup.size[1], self.border_size)
-        Plugin.__init__(self, centered_pos) # TODO Pretty confident this should be before anything else
+        super(Popup, self).__init__(self, centered_pos) # TODO Pretty confident this should be before anything else
         self.position = centered_pos
         self.last_data = text

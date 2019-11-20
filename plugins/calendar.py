@@ -49,7 +49,7 @@ class Calendar(Plugin):
 
     def starting_soon_events(self):
         """
-        Obtain a 
+        Obtain a formatted list of events starting soon. 
         """
         starting_soon = lambda event: not is_all_day(event) and is_event_upcoming(event)
         return [f"Starting: {event['summary']}" for event in self.events if starting_soon(event)]
@@ -107,13 +107,21 @@ def format_event(event):
     eg: 14:10 : Meeting X, 10m LEFT : Meeting
     """
     if is_event_ongoing(event):
-            return f"{time_delta_from_now_formatted(event['end'])}m LEFT : {event['summart']}"
+        return f"{time_delta_from_now_formatted(event['end'])} LEFT : {event['summary']}"
     else:
         formatted_time = datetime.utcfromtimestamp(ambiguous_time_to_unix(event['start'])).strftime('%H:%M')
         return f"{formatted_time} : {event['summary']}"
     
 def is_all_day(event):
-    return 'date' in event['start'] and 'date' in event['end']
+    # We consider events longer then 12h as full day
+    start, end = event['start'], event['end']
+    return ('date' in start and 'date' in end or
+        time_diff(start, end) > timedelta(hours = 12))
+
+def time_diff(start, end):
+    start = ambiguous_time_to_unix(start)
+    end = ambiguous_time_to_unix(end)
+    return timedelta(seconds = end - start)
 
 def time_delta_from_now(time):
     now = datetime.now().timestamp()
