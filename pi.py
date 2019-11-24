@@ -11,7 +11,6 @@ import iso8601
 from position import Position
 from plugins.plugin import Plugin
 import time
-import uuid
 import logging
 
 CONFIG = json.load(open("config.json"))
@@ -100,9 +99,8 @@ class Pi:
         Update the actual E-Ink Screen with the latest Image generated
         """
         logging.info("Refreshing Screen")
-        self.screen.save(f"img/{uuid.uuid4().hex}.png")
-        # self.inky.set_image(self.screen)
-        # self.inky.show()
+        self.inky.set_image(self.screen)
+        self.inky.show()
     
     def show_popup(self, popup_text):
         """
