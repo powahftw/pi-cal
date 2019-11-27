@@ -17,17 +17,18 @@ else:
     # For testing locally we use a Mock which mimick the Inky class but save to img/ instead of displaying it them.
     class InkyMock():
         WIDTH, HEIGHT = 212, 104
-    def __init__(self):
-        self.times = 0
 
-    def set_image(self, screen):
-        self.screen = screen
+        def __init__(self):
+            self.times = 0
 
-    def show(self):
-        filename = f"img/{self.times}-{uuid.uuid4().hex}.png"
-        if self.screen:
-            self.screen.save(filename)
-            self.times += 1
+        def set_image(self, screen):
+            self.screen = screen
+
+        def show(self):
+            filename = f"img/{self.times}-{uuid.uuid4().hex}.png"
+            if self.screen:
+                self.screen.save(filename)
+                self.times += 1
 
 # 212x104 
 
@@ -36,9 +37,10 @@ if __name__ == "__main__":
     inky = InkyPHAT('black') if RUNNING_ON_PI else InkyMock()
     pi = Pi(inky)
     
-    w, h, border = 150 *  CONFIG['UPSCALE'], 50 * CONFIG['UPSCALE'], 1 * CONFIG['UPSCALE']
-    TOP_LEFT = Position(0, 0, w, h, border)
-    BOTTOM_RIGHT = Position(inky.WIDTH * CONFIG['UPSCALE'] - 140, inky.HEIGHT * CONFIG['UPSCALE'] - 45, 140, 45, border)
+    w, h, border = 150, 50, 1
+    TOP_LEFT = Position(0, 0, w, h, border, CONFIG['UPSCALE'])
+    w, h, border = 55, 15, 0
+    BOTTOM_RIGHT = Position(inky.WIDTH - w, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
 
     pi.register_plugin(Calendar, TOP_LEFT)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)

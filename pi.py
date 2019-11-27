@@ -22,7 +22,7 @@ class Pi:
     
     def __init__(self, inky):
         self.inky = inky
-        self.display_size = inky.WIDTH * CONFIG['UPSCALE'],inky.HEIGHT * CONFIG['UPSCALE']
+        self.display_size = inky.WIDTH * CONFIG['UPSCALE'], inky.HEIGHT * CONFIG['UPSCALE']
         self.screen = PIL.Image.new('RGB', self.display_size, tuple(CONFIG['BACKGROUND_COLOR_RGB']))
         self.last_updated = datetime.utcfromtimestamp(0)
         
@@ -126,13 +126,15 @@ class Pi:
 class Popup(Plugin):
 
     name = "POPUP"
-    size = (100 * CONFIG['UPSCALE'], 30 * CONFIG['UPSCALE'])
-    border_size = 2 * CONFIG['UPSCALE']
+    width, height = 100, 30
+    border_size = 2
 
     def __init__(self, text, parent_size):
         middle_x, middle_y = tuple(x // 2 for x in parent_size)
-        start_x, start_y = middle_x - (Popup.size[0] // 2), middle_y - (Popup.size[1] // 2)
-        centered_pos = Position(start_x, start_y, Popup.size[0], Popup.size[1], self.border_size)
-        super(Popup, self).__init__(self, centered_pos) # TODO Pretty confident this should be before anything else
+        start_x, start_y = middle_x - (Popup.width // 2), middle_y - (Popup.height // 2)
+        centered_pos = Position(start_x, start_y, Popup.width, Popup.height, self.border_size, CONFIG['UPSCALE'])
+
+        super(Popup, self).__init__(self, centered_pos)
+
         self.position = centered_pos
         self.last_data = text

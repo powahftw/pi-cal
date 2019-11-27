@@ -36,20 +36,21 @@ class Plugin():
     @staticmethod
     def fit_text(line, max_width, fit_mode, font_size):
 
-        MIN_FONT_SIZE_PT = 2
+        MINIMUM_FONT_SIZE = 2
 
         logging.info(f"\nFitting text:\n{line}\nMODE: {fit_mode}")
         if fit_mode == 0: return line
         line_w, _ = Plugin.FONT.getsize(line)
-        if line_w < max_width: return line # TODO Performance issue with long lines, should do a binary search
-        while line_w >= max_width and line:
+        if line_w < max_width: return line
+        # TODO Performance issue with long lines, should do a binary search
+        while line_w >= max_width and line and font_size > MINIMUM_FONT_SIZE:
             if fit_mode == 1:
                 line = line[:-1] # Remove last char
-                line_w, _= Plugin.FONT.getsize(line + "..")
-            elif fit_mode == 2 and font_size >= MIN_FONT_SIZE_PT:
+                line_w, _ = Plugin.FONT.getsize(line + "..")
+            elif fit_mode == 2:
                 font_size -= 0.5
                 line_w, _ = Plugin.FONT.getsize(line)
-        # This means we had to delete stuff from the string, so we need to elipsize
+        # If we had to delete stuff from the string, so we need to elipsize
         if fit_mode == 1: line += ".." 
         logging.info(f"FITTED LINE: {line}")
         return line
