@@ -45,4 +45,3 @@ if __name__ == "__main__":
     pi.register_plugin(Calendar, TOP_LEFT)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
     pi.maybe_update_and_refresh()
-    # Remove all * 2, which is temp poor man upscaling

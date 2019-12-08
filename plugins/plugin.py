@@ -70,6 +70,7 @@ class Plugin():
             text_on.text((OFFSET_LEFT, curr_h), fitted_line,
                          font = self.FONT, fill = tuple(CONFIG['TEXT_COLOR']))
             curr_h += line_h # Assuming vertical spacing is already embedded in drawed_line
+                             # TODO Constant spacing actually looks better...
         return txt_img
     
     # Common method 

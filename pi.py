@@ -22,7 +22,7 @@ class Pi:
     
     def __init__(self, inky):
         self.inky = inky
-        self.display_size = inky.WIDTH * CONFIG['UPSCALE'], inky.HEIGHT * CONFIG['UPSCALE']
+        self.display_size = inky.WIDTH * CONFIG['UPSCALE'], inky.HEIGHT * CONFIG['UPSCALE'] # Make this not dependent on UPSCALE
         self.screen = PIL.Image.new('RGB', self.display_size, tuple(CONFIG['BACKGROUND_COLOR_RGB']))
         self.last_updated = datetime.utcfromtimestamp(0)
         
@@ -99,7 +99,9 @@ class Pi:
         Update the actual E-Ink Screen with the latest Image generated
         """
         logging.info("Refreshing Screen")
-        self.inky.set_image(self.screen)
+        to_display = self.screen.copy().convert('L') # Convert img to BW
+        to_display.thumbnail((self.inky.WIDTH, self.inky.HEIGHT), Image.ANTIALIAS) # Scale it to the Inky display size
+        self.inky.set_image(to_display)
         self.inky.show()
     
     def show_popup(self, popup_text):
