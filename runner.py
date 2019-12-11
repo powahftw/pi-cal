@@ -37,9 +37,9 @@ if __name__ == "__main__":
     inky = InkyPHAT('black') if RUNNING_ON_PI else InkyMock()
     pi = Pi(inky)
     
-    w, h, border = 150, 50, 1
+    w, h, border = 210, 50, 1
     TOP_LEFT = Position(0, 0, w, h, border, CONFIG['UPSCALE'])
-    w, h, border = 55, 15, 0
+    w, h, border = 75, 20, 0
     BOTTOM_RIGHT = Position(inky.WIDTH - w, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
 
     pi.register_plugin(Calendar, TOP_LEFT)

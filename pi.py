@@ -89,7 +89,7 @@ class Pi:
         Render a new Screen Image from all the Plugins. 
         """
         logging.info("Generating Screen")
-        self.screen = PIL.Image.new('RGB', self.screen.size, tuple(CONFIG['BACKGROUND_COLOR_RGB'])) # Create new blank PIL Image with same size as previous one
+        self.screen = PIL.Image.new('P', self.screen.size, tuple(CONFIG['BACKGROUND_COLOR_RGB'])) # Create new blank PIL Image with same size as previous one
         for name, plugin in self.plugins.items():
             logging.info(f"Generating {name} view...")
             self.add_image(plugin.render(), plugin.position)
@@ -99,7 +99,7 @@ class Pi:
         Update the actual E-Ink Screen with the latest Image generated
         """
         logging.info("Refreshing Screen")
-        to_display = self.screen.copy().convert('L') # Convert img to BW
+        to_display = self.screen.copy().convert('P') # Convert img to BW
         to_display.thumbnail((self.inky.WIDTH, self.inky.HEIGHT), Image.ANTIALIAS) # Scale it to the Inky display size
         self.inky.set_image(to_display)
         self.inky.show()
@@ -109,7 +109,7 @@ class Pi:
         Generate and display in the middle of the Screen a new Popup based on Popup Text
         """
         logging.info(f"Processing Popup: {popup_text}")
-        popup = Popup(popup_text, self.display_size)
+        popup = Popup([popup_text], (self.inky.WIDTH, self.inky.HEIGHT))
         self.add_image(popup.render(), popup.position)
         self.refresh_screen()
 
@@ -128,7 +128,7 @@ class Pi:
 class Popup(Plugin):
 
     name = "POPUP"
-    width, height = 100, 30
+    width, height = 120, 35
     border_size = 2
 
     def __init__(self, text, parent_size):
@@ -136,7 +136,7 @@ class Popup(Plugin):
         start_x, start_y = middle_x - (Popup.width // 2), middle_y - (Popup.height // 2)
         centered_pos = Position(start_x, start_y, Popup.width, Popup.height, self.border_size, CONFIG['UPSCALE'])
 
-        super(Popup, self).__init__(self, centered_pos)
+        super(Popup, self).__init__(centered_pos)
 
         self.position = centered_pos
         self.last_data = text

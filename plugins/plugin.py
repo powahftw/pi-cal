@@ -2,9 +2,10 @@ import json
 import PIL 
 from PIL import Image, ImageDraw, ImageFont
 import logging
+from font_fredoka_one import FredokaOne
 
 CONFIG = json.load(open("config.json"))
-logging = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 import sys
 sys.path.append("..") # Adds higher directory to python modules path.
@@ -12,8 +13,8 @@ from position import Position
 
 class Plugin():
     
-    FONT = PIL.ImageFont.truetype(CONFIG['FONT_PATH'], 9 * CONFIG['UPSCALE'])
-            
+    FONT = ImageFont.truetype(FredokaOne, 12 * CONFIG['UPSCALE'])
+
     def __init__(self, position):
         self.position = position # Position (start_X, start_Y, width, height, border)
         self.last_data = []
@@ -26,7 +27,7 @@ class Plugin():
         return popup
 
     def check_and_store_potential_new_data(self):
-        logging.info(type(self))
+        logger.info(type(self))
         data, popups = self.update()
         if popups or data != self.last_data:
             self.last_data, self.last_popup = data, popups
@@ -38,7 +39,7 @@ class Plugin():
 
         MINIMUM_FONT_SIZE = 2
 
-        logging.info(f"\nFitting text:\n{line}\nMODE: {fit_mode}")
+        logger.info(f"\nFitting text:\n{line}\nMODE: {fit_mode}")
         if fit_mode == 0: return line
         line_w, _ = Plugin.FONT.getsize(line)
         if line_w < max_width: return line
@@ -52,7 +53,7 @@ class Plugin():
                 line_w, _ = Plugin.FONT.getsize(line)
         # If we had to delete stuff from the string, so we need to elipsize
         if fit_mode == 1: line += ".." 
-        logging.info(f"FITTED LINE: {line}")
+        logger.info(f"FITTED LINE: {line}")
         return line
                  
     # TODO Fit_Mode to convert to enum
@@ -60,10 +61,10 @@ class Plugin():
     def render_lines(self, lines, position, fit_mode = 1, font_size = 12):
         OFFSET_LEFT, curr_h = 3, 3
         _, _, max_w, max_h = self.position.get_content_box()
-        txt_img = PIL.Image.new('RGB', (max_w, max_h), tuple(CONFIG['BACKGROUND_COLOR_RGB']))
+        txt_img = PIL.Image.new('P', (max_w, max_h), tuple(CONFIG['BACKGROUND_COLOR_RGB']))
         text_on = PIL.ImageDraw.Draw(txt_img)
         for line in lines:
-            logging.info(f"CURR_H {curr_h}, MAX_H {max_h}")
+            logger.info(f"CURR_H {curr_h}, MAX_H {max_h}")
             fitted_line = Plugin.fit_text(line, max_w - OFFSET_LEFT, fit_mode, font_size)
             _, line_h = self.FONT.getsize(fitted_line)
             if curr_h + line_h > max_h: break
