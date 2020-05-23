@@ -4,5 +4,5 @@ token.pickle
 config.json
 fonts/
 img/
-!img/.keep
+!img/demo.jpg
 info.log
