@@ -14,6 +14,7 @@ from position import Position
 class Plugin():
     
     FONT = ImageFont.truetype(FredokaOne, 12 * CONFIG['UPSCALE'])
+    TEXT_COLOR, TEXT_BACKGROUND_COLOR = 0, 1
 
     def __init__(self, position):
         self.position = position # Position (start_X, start_Y, width, height, border)
@@ -60,7 +61,7 @@ class Plugin():
     def render_lines(self, lines, position, fit_mode = 1, font_size = 12):
         OFFSET_LEFT, curr_h = 3, 3
         _, _, max_w, max_h = self.position.get_content_box()
-        txt_img = PIL.Image.new('P', (max_w, max_h), 1)
+        txt_img = PIL.Image.new('P', (max_w, max_h), Plugin.TEXT_BACKGROUND_COLOR)
         text_on = PIL.ImageDraw.Draw(txt_img)
         for line in lines:
             logger.info(f"CURR_H {curr_h}, MAX_H {max_h}")
@@ -68,7 +69,7 @@ class Plugin():
             _, line_h = self.FONT.getsize(fitted_line)
             if curr_h + line_h > max_h: break
             text_on.text((OFFSET_LEFT, curr_h), fitted_line,
-                         font = self.FONT, fill = 0)
+                         font = self.FONT, fill = Plugin.TEXT_COLOR)
             curr_h += line_h # Assuming vertical spacing is already embedded in drawed_line
                              # TODO Constant spacing actually looks better...
         return txt_img

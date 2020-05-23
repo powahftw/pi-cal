@@ -6,6 +6,7 @@ from position import Position
 import json
 import uuid
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 CONFIG = json.load(open("config.json"))
@@ -18,7 +19,7 @@ else:
     # For testing locally we use a Mock which mimick the Inky class but save to img/ instead of displaying it them.
     class InkyMock():
         WIDTH, HEIGHT = 212, 104
-
+        WHITE, BLACK = 0, 1
         def __init__(self):
             self.times = 0
 
@@ -48,4 +49,9 @@ if __name__ == "__main__":
     pi.register_plugin(Calendar, TOP_LEFT)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
     pi.register_plugin(Time, BOTTOM_LEFT)
-    pi.maybe_update_and_refresh()
+
+    running = True
+    while (running):
+        logging.info(f"Checking Updates")
+        pi.maybe_update_and_refresh()
+        time.sleep(CONFIG["SECONDS_BETWEEN_CHECKING_UPDATES"])

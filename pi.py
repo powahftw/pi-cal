@@ -23,7 +23,7 @@ class Pi:
     def __init__(self, inky):
         self.inky = inky
         self.display_size = inky.WIDTH * CONFIG['UPSCALE'], inky.HEIGHT * CONFIG['UPSCALE'] # Make this not dependent on UPSCALE
-        self.screen = PIL.Image.new('P', self.display_size, 0)
+        self.screen = PIL.Image.new('P', self.display_size, inky.WHITE)
         self.last_updated = datetime.utcfromtimestamp(0)
         
         # plugin.name -> {plugin}
@@ -89,7 +89,7 @@ class Pi:
         Render a new Screen Image from all the Plugins. 
         """
         logging.info("Generating Screen")
-        self.screen = PIL.Image.new('P', self.screen.size, 0) # Create new blank PIL Image with same size as previous one
+        self.screen = PIL.Image.new('P', self.screen.size, self.inky.WHITE) # Create new blank PIL Image with same size as previous one
         for name, plugin in self.plugins.items():
             logging.info(f"Generating {name} view...")
             self.add_image(plugin.render(), plugin.position)
@@ -121,7 +121,7 @@ class Pi:
         background = self.screen
         if position.border:
             # Render a border as background
-            PIL.ImageDraw.Draw(background).rectangle(position.get_bounding_box(), fill = 0)
+            PIL.ImageDraw.Draw(background).rectangle(position.get_bounding_box(), fill = self.inky.WHITE)
         background.paste(img, (position.get_content_box()[:2]))
 
 
