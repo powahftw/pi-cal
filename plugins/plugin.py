@@ -60,7 +60,7 @@ class Plugin():
     def render_lines(self, lines, position, fit_mode = 1, font_size = 12):
         OFFSET_LEFT, curr_h = 3, 3
         _, _, max_w, max_h = self.position.get_content_box()
-        txt_img = PIL.Image.new('P', (max_w, max_h), CONFIG['BACKGROUND_COLOR'])
+        txt_img = PIL.Image.new('P', (max_w, max_h), 1)
         text_on = PIL.ImageDraw.Draw(txt_img)
         for line in lines:
             logger.info(f"CURR_H {curr_h}, MAX_H {max_h}")
@@ -68,7 +68,7 @@ class Plugin():
             _, line_h = self.FONT.getsize(fitted_line)
             if curr_h + line_h > max_h: break
             text_on.text((OFFSET_LEFT, curr_h), fitted_line,
-                         font = self.FONT, fill = CONFIG['BACKGROUND_COLOR'])
+                         font = self.FONT, fill = 0)
             curr_h += line_h # Assuming vertical spacing is already embedded in drawed_line
                              # TODO Constant spacing actually looks better...
         return txt_img

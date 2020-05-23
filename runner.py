@@ -1,6 +1,7 @@
 from pi import Pi
 from plugins.calendar import Calendar
 from plugins.timestamp import Timestamp
+from plugins.time import Time
 from position import Position
 import json
 import uuid
@@ -9,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 CONFIG = json.load(open("config.json"))
 
-RUNNING_ON_PI = False
+RUNNING_ON_PI = True
 if RUNNING_ON_PI:
     from inky import InkyPHAT
 else:
@@ -41,7 +42,10 @@ if __name__ == "__main__":
     TOP_LEFT = Position(0, 0, w, h, border, CONFIG['UPSCALE'])
     w, h, border = 75, 20, 0
     BOTTOM_RIGHT = Position(inky.WIDTH - w, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
+    w, h, border = 45, 20, 0
+    BOTTOM_LEFT = Position(0, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
 
     pi.register_plugin(Calendar, TOP_LEFT)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
+    pi.register_plugin(Time, BOTTOM_LEFT)
     pi.maybe_update_and_refresh()
