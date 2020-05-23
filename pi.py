@@ -23,7 +23,7 @@ class Pi:
     def __init__(self, inky):
         self.inky = inky
         self.display_size = inky.WIDTH * CONFIG['UPSCALE'], inky.HEIGHT * CONFIG['UPSCALE'] # Make this not dependent on UPSCALE
-        self.screen = PIL.Image.new('RGB', self.display_size, tuple(CONFIG['BACKGROUND_COLOR_RGB']))
+        self.screen = PIL.Image.new('P', self.display_size, CONFIG['BACKGROUND_COLOR'])
         self.last_updated = datetime.utcfromtimestamp(0)
         
         # plugin.name -> {plugin}
@@ -89,7 +89,7 @@ class Pi:
         Render a new Screen Image from all the Plugins. 
         """
         logging.info("Generating Screen")
-        self.screen = PIL.Image.new('P', self.screen.size, tuple(CONFIG['BACKGROUND_COLOR_RGB'])) # Create new blank PIL Image with same size as previous one
+        self.screen = PIL.Image.new('P', self.screen.size, CONFIG['BACKGROUND_COLOR']) # Create new blank PIL Image with same size as previous one
         for name, plugin in self.plugins.items():
             logging.info(f"Generating {name} view...")
             self.add_image(plugin.render(), plugin.position)
@@ -99,7 +99,7 @@ class Pi:
         Update the actual E-Ink Screen with the latest Image generated
         """
         logging.info("Refreshing Screen")
-        to_display = self.screen.copy().convert('P') # Convert img to BW
+        to_display = self.screen.copy()
         to_display.thumbnail((self.inky.WIDTH, self.inky.HEIGHT), Image.ANTIALIAS) # Scale it to the Inky display size
         self.inky.set_image(to_display)
         self.inky.show()
@@ -121,7 +121,7 @@ class Pi:
         background = self.screen
         if position.border:
             # Render a border as background
-            PIL.ImageDraw.Draw(background).rectangle(position.get_bounding_box(), fill = tuple(CONFIG['TEXT_COLOR']))
+            PIL.ImageDraw.Draw(background).rectangle(position.get_bounding_box(), fill = CONFIG['BACKGROUND_COLOR'])
         background.paste(img, (position.get_content_box()[:2]))
 
 
