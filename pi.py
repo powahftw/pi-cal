@@ -17,9 +17,10 @@ CONFIG = json.load(open("config.json"))
 logger = logging.getLogger(__name__)
 
 UPDATE_FREQUENCY = CONFIG['SECONDS_BETWEEN_CHECKING_UPDATES']
+FLIP_VERTICALLY = True
 
 class Pi:
-    
+
     def __init__(self, inky):
         self.inky = inky
         self.display_size = inky.WIDTH * CONFIG['UPSCALE'], inky.HEIGHT * CONFIG['UPSCALE'] # Make this not dependent on UPSCALE
@@ -100,6 +101,8 @@ class Pi:
         """
         logging.info("Refreshing Screen")
         to_display = self.screen.copy()
+        if (FLIP_VERTICALLY):
+            to_display = to_display.transpose(PIL.Image.ROTATE_180)
         to_display.thumbnail((self.inky.WIDTH, self.inky.HEIGHT), Image.ANTIALIAS) # Scale it to the Inky display size
         self.inky.set_image(to_display)
         self.inky.show()
