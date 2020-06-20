@@ -30,7 +30,7 @@ class Pi:
         # plugin.name -> {plugin}
         self.plugins = {}
         self.popups = deque()  
-    
+
     def register_plugin(self, plugin, position):
         try:
             self.plugins[plugin.name] = plugin(position) # Instantiate it and save it in the map with the name
@@ -50,7 +50,7 @@ class Pi:
             self.pool_plugins_and_maybe_refresh()
             self.last_updated = datetime.now()
             logging.info("POOLED")
-    
+
     # Obtain fresh info data from plugins, and if any is new refresh the screen. 
     def pool_plugins_and_maybe_refresh(self):
         """
@@ -80,11 +80,11 @@ class Pi:
         if need_refresh or self.popups:
             # This also take care of removing the popups
             self.generate_and_refresh_screen()
-                
+ 
     def generate_and_refresh_screen(self):
         self.generate_new_screen()
         self.refresh_screen()
-         
+
     def generate_new_screen(self):
         """
         Render a new Screen Image from all the Plugins. 
@@ -106,7 +106,7 @@ class Pi:
         to_display.thumbnail((self.inky.WIDTH, self.inky.HEIGHT), Image.ANTIALIAS) # Scale it to the Inky display size
         self.inky.set_image(to_display)
         self.inky.show()
-    
+
     def show_popup(self, popup_text):
         """
         Generate and display in the middle of the Screen a new Popup based on Popup Text

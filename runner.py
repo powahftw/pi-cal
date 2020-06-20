@@ -2,6 +2,7 @@ from pi import Pi
 from plugins.calendar import Calendar
 from plugins.timestamp import Timestamp
 from plugins.time import Time
+from plugins.memused import MemUsed
 from position import Position
 import json
 import uuid
@@ -38,17 +39,22 @@ if __name__ == "__main__":
     logging.basicConfig(filename='info.log', filemode='w', level = logging.DEBUG)
     inky = InkyPHAT('black') if RUNNING_ON_PI else InkyMock()
     pi = Pi(inky)
-    
+
     w, h, border = 210, 50, 1
     TOP_LEFT = Position(0, 0, w, h, border, CONFIG['UPSCALE'])
     w, h, border = 75, 20, 0
     BOTTOM_RIGHT = Position(inky.WIDTH - w, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
     w, h, border = 45, 20, 0
     BOTTOM_LEFT = Position(0, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
+    ends_at = w
+    w, h, border = 85, 20, 0
+    BOTTOM_MIDDLE = Position(ends_at, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
+
 
     pi.register_plugin(Calendar, TOP_LEFT)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
     pi.register_plugin(Time, BOTTOM_LEFT)
+    pi.register_plugin(MemUsed, BOTTOM_MIDDLE)
 
     running = True
     while (running):
