@@ -19,3 +19,29 @@ class Position():
     
     def get_z_index(self):
         return self.z_index
+
+    """
+    Supported patterns:
+        FIRST_X
+        LAST_X
+        FROM_X_TO_Y
+    By default columns are 21px wide, rows are 17px wide.
+    """
+    @staticmethod
+    def grid_to_pixels(x, y, maxx = 212, maxy = 104, divx = 10, divy = 6, padding = 1, border = 0, upscale = 1, z_index = 0):
+        def parse(str_value, max_value, chunk_size):
+            op, *args = str_value.split("_")
+            if op == "FIRST":
+                from_px, chunk_n = 0, int(args[0])
+            elif op == "LAST":
+                last_px = int(args[0]) * chunk_size
+                from_px, chunk_n = max_value - last_px - 1, int(args[0])
+            elif op == "FROM":
+                last_px = int(args[0]) * chunk_size
+                from_px, chunk_n = max_value - last_px - 1, int(args[2])
+            else: raise ValueError(f"Unsupported operator {op}")
+            return max(from_px, padding), chunk_n * chunk_size
+        column_size, row_size = int((maxx - 2 * padding) / divx), int((maxy - 2 * padding) / divy)
+        x0, dx = parse(x, maxx, column_size)
+        y0, dy = parse(y, maxy, row_size)
+        return Position(x0, y0, dx, dy, border, upscale, z_index)

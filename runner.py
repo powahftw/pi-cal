@@ -12,7 +12,7 @@ import time
 logger = logging.getLogger(__name__)
 CONFIG = json.load(open("config.json"))
 
-RUNNING_ON_PI = True
+RUNNING_ON_PI = False
 if RUNNING_ON_PI:
     from inky import InkyPHAT
 else:
@@ -39,22 +39,17 @@ if __name__ == "__main__":
     logging.basicConfig(filename='info.log', filemode='w', level = logging.DEBUG)
     inky = InkyPHAT('black') if RUNNING_ON_PI else InkyMock()
     pi = Pi(inky)
+    # 10 x 6 GRID
+    upscale = CONFIG["UPSCALE"]
+    TOP_HALF = Position.grid_to_pixels("FIRST_10", "FIRST_3", border = 1, upscale = upscale)
+    BOTTOM_RIGHT = Position.grid_to_pixels("FIRST_6", "LAST_1", border= 1, upscale = upscale)
+    BOTTOM_LEFT = Position.grid_to_pixels("FIRST_4", "LAST_1", border = 1, upscale = upscale)
+    MIDDLE_LEFT = Position.grid_to_pixels("FIRST_4", "FROM_4_TO_5", border = 1, upscale = upscale)
 
-    w, h, border = 210, 50, 1
-    TOP_LEFT = Position(0, 0, w, h, border, CONFIG['UPSCALE'])
-    w, h, border = 75, 20, 0
-    BOTTOM_RIGHT = Position(inky.WIDTH - w, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
-    w, h, border = 45, 20, 0
-    BOTTOM_LEFT = Position(0, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
-    ends_at = w
-    w, h, border = 85, 20, 0
-    BOTTOM_MIDDLE = Position(ends_at, inky.HEIGHT - h, w, h, border, CONFIG['UPSCALE'])
-
-
-    pi.register_plugin(Calendar, TOP_LEFT)
+    pi.register_plugin(Calendar, TOP_HALF)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
     pi.register_plugin(Time, BOTTOM_LEFT)
-    pi.register_plugin(MemUsed, BOTTOM_MIDDLE)
+    pi.register_plugin(MemUsed, MIDDLE_LEFT)
 
     running = True
     while (running):
