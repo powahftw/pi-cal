@@ -3,6 +3,7 @@ from plugins.calendar import Calendar
 from plugins.timestamp import Timestamp
 from plugins.time import Time
 from plugins.memused import MemUsed
+from plugins.logreader import LogReader
 from position import Position
 import json
 import uuid
@@ -42,14 +43,16 @@ if __name__ == "__main__":
     # 10 x 6 GRID
     upscale = CONFIG["UPSCALE"]
     TOP_HALF = Position.grid_to_pixels("FIRST_10", "FIRST_3", border = 1, upscale = upscale)
-    BOTTOM_RIGHT = Position.grid_to_pixels("FIRST_4", "LAST_2", border= 1, upscale = upscale)
-    BOTTOM_LEFT = Position.grid_to_pixels("FIRST_6", "LAST_2", border = 1, upscale = upscale)
+    BOTTOM_RIGHT = Position.grid_to_pixels("LAST_6", "LAST_2", border= 1, upscale = upscale)
+    BOTTOM_LEFT = Position.grid_to_pixels("FIRST_4", "LAST_2", border = 1, upscale = upscale)
     MIDDLE_LEFT = Position.grid_to_pixels("FIRST_4", "FROM_3_TO_4", border = 1, upscale = upscale)
-
+    MIDDLE_RIGHT = Position.grid_to_pixels("LAST_6", "FROM_3_TO_4", border = 1, upscale = upscale)
+    
     pi.register_plugin(Calendar, TOP_HALF)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
     pi.register_plugin(Time, BOTTOM_LEFT)
     pi.register_plugin(MemUsed, MIDDLE_LEFT)
+    pi.register_plugin(LogReader, MIDDLE_RIGHT)
 
     running = True
     while (running):
