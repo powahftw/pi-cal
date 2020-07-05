@@ -45,5 +45,4 @@ class Position():
         column_size, row_size = int((maxx - 2 * padding) / divx), int((maxy - 2 * padding) / divy)
         x0, dx = parse(x, maxx, column_size)
         y0, dy = parse(y, maxy, row_size)
-        print(x0, dx, y0, dy)
         return Position(x0, y0, dx, dy, border, upscale, z_index)

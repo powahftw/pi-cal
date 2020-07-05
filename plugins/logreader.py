@@ -15,4 +15,4 @@ class LogReader(Plugin):
 
     def update(self):
         with open(LogReader.LOG_FILE_PATH, 'r') as f:
-            return f.read().splitlines()[-1]
+            return f.read().splitlines()[-1], None
