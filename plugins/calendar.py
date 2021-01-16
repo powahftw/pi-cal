@@ -107,7 +107,7 @@ def format_event(event):
     eg: 14:10 : Meeting X, 10m LEFT : Meeting
     """
     if is_event_ongoing(event):
-        return f"{time_delta_from_now_formatted(event['end'])} LEFT : {event['summary']}"
+        return f"{format_duration(event['end'])} LEFT : {event['summary']}"
     else:
         formatted_time = datetime.utcfromtimestamp(ambiguous_time_to_unix(event['start'])).strftime('%H:%M')
         return f"{formatted_time} : {event['summary']}"
@@ -119,6 +119,9 @@ def is_all_day(event):
         time_diff(start, end) > timedelta(hours = 12))
 
 def time_diff(start, end):
+    """
+    Returns the difference, in seconds, between a start time and an end time
+    """
     start = ambiguous_time_to_unix(start)
     end = ambiguous_time_to_unix(end)
     return timedelta(seconds = end - start)
@@ -127,9 +130,6 @@ def time_delta_from_now(time):
     now = datetime.now().timestamp()
     time = ambiguous_time_to_unix(time)
     return timedelta(seconds = time - now)
-
-def time_delta_from_now_formatted(time):
-    return format_duration(time_delta_from_now(time))
 
 def format_duration(duration):
     """

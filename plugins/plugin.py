@@ -11,6 +11,11 @@ import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 from position import Position
 
+class FitMode():
+    NOTHING = 1     # Don't adjust the text at all.
+    ELIPSIZE = 2    # Elipsize to make it fit.
+    ADJUST_FONT = 3 # Reduze font size to make it fit.
+
 class Plugin():
     
     FONT = ImageFont.truetype(FredokaOne, 12 * CONFIG['UPSCALE'])
@@ -40,25 +45,23 @@ class Plugin():
         MINIMUM_FONT_SIZE = 2
 
         logger.info(f"\nFitting text:\n{line}\nMODE: {fit_mode}")
-        if fit_mode == 0: return line
+        if fit_mode == FitMode.NOTHING: return line
         line_w, _ = Plugin.FONT.getsize(line)
         if line_w < max_width: return line
-        # TODO Performance issue with long lines, should do a binary search
+
         while line_w >= max_width and line and font_size > MINIMUM_FONT_SIZE:
-            if fit_mode == 1:
+            if fit_mode == FitMode.ELIPSIZE:
                 line = line[:-1] # Remove last char
                 line_w, _ = Plugin.FONT.getsize(line + "..")
-            elif fit_mode == 2:
+            elif fit_mode == FitMode.ADJUST_FONT:
                 font_size -= 0.5
                 line_w, _ = Plugin.FONT.getsize(line)
         # If we had to delete stuff from the string, so we need to elipsize
-        if fit_mode == 1: line += ".." 
+        if fit_mode == FitMode.ELIPSIZE: line += ".." 
         logger.info(f"FITTED LINE: {line}")
         return line
-                 
-    # TODO Fit_Mode to convert to enum
-    # 0 do nothing, 1 elipsize text, 2 reduce font to fit.
-    def render_lines(self, lines, position, fit_mode = 1, font_size = 12):
+    
+    def render_lines(self, lines, position, fit_mode = FitMode.NOTHING, font_size = 12):
         OFFSET_LEFT, curr_h = 3, 3
         _, _, max_w, max_h = self.position.get_content_box()
         txt_img = PIL.Image.new('P', (max_w, max_h), Plugin.TEXT_BACKGROUND_COLOR)
@@ -71,7 +74,6 @@ class Plugin():
             text_on.text((OFFSET_LEFT, curr_h), fitted_line,
                          font = self.FONT, fill = Plugin.TEXT_COLOR)
             curr_h += line_h # Assuming vertical spacing is already embedded in drawed_line
-                             # TODO Constant spacing actually looks better...
         return txt_img
     
     # Common method 

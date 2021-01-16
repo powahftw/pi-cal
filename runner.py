@@ -46,13 +46,12 @@ if __name__ == "__main__":
     BOTTOM_RIGHT = Position.grid_to_pixels("LAST_6", "LAST_2", border= 1, upscale = upscale)
     BOTTOM_LEFT = Position.grid_to_pixels("FIRST_4", "LAST_2", border = 1, upscale = upscale)
     MIDDLE_LEFT = Position.grid_to_pixels("FIRST_4", "FROM_3_TO_4", border = 1, upscale = upscale)
-    MIDDLE_RIGHT = Position.grid_to_pixels("LAST_6", "FROM_3_TO_4", border = 1, upscale = upscale)
     
     pi.register_plugin(Calendar, TOP_HALF)
     pi.register_plugin(Timestamp, BOTTOM_RIGHT)
     pi.register_plugin(Time, BOTTOM_LEFT)
     pi.register_plugin(MemUsed, MIDDLE_LEFT)
-    pi.register_plugin(LogReader, MIDDLE_RIGHT)
+    # pi.register_plugin(LogReader, MIDDLE_RIGHT)
 
     running = True
     while (running):
