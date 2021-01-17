@@ -39,8 +39,8 @@ class Position():
             elif op == "FROM":
                 last_px = int(args[0]) * chunk_size
                 from_px, chunk_n = max_value - last_px - 1, int(args[2]) - int(args[0])
-            else: raise ValueError(f"Unsupported operator {op}")
-            print(from_px, chunk_n * chunk_size)
+            else: 
+                raise ValueError(f"Unsupported operator {op}")
             return max(from_px, padding), chunk_n * chunk_size
         column_size, row_size = int((maxx - 2 * padding) / divx), int((maxy - 2 * padding) / divy)
         x0, dx = parse(x, maxx, column_size)

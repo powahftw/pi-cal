@@ -34,7 +34,6 @@ class Pi:
     def register_plugin(self, plugin, position):
         try:
             self.plugins[plugin.name] = plugin(position) # Instantiate it and save it in the map with the name
-            ## Maybe we could assert that position fit in the Inky and that it has the methods we expect. Inherithance maybe?
             logging.info("Plugin {} Loaded - X: {} Y: {} Width: {} Height: {}".format(plugin.name, *position.get_border_box())) # Check if we can upack self params this way for position
             return True
         except Exception as e:
@@ -49,7 +48,7 @@ class Pi:
         if second_from_last_update >= UPDATE_FREQUENCY:
             self.pool_plugins_and_maybe_refresh()
             self.last_updated = datetime.now()
-            logging.info("POOLED")
+            logging.info("Pooled plugins.")
 
     # Obtain fresh info data from plugins, and if any is new refresh the screen. 
     def pool_plugins_and_maybe_refresh(self):
